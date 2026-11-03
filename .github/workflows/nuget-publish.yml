@@ -9,6 +9,9 @@ on:
 jobs:
   build-test-pack-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Trusted publishing: lets NuGet/login request an OIDC token
 
     steps:
       - name: Checkout repository
@@ -31,12 +34,20 @@ jobs:
       - name: Pack NuGet packages
         run: dotnet pack --configuration Release --no-build --output nupkgs
 
+      # Trusted publishing: exchanges the GitHub OIDC token for a short-lived NuGet API key.
+      # Requires a trusted publishing policy for this repository and workflow on nuget.org.
+      - name: Log in to NuGet.org
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       # Only a new version is published. Pushing an existing version is skipped.
       - name: Publish to NuGet.org
         run: |
           for package in nupkgs/*.nupkg; do
             dotnet nuget push "$package" \
               --source https://api.nuget.org/v3/index.json \
-              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
               --skip-duplicate
           done

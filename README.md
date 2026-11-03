@@ -162,3 +162,5 @@ configured with command line arguments (e.g. `--NoAuth:Strict=true`).
 
 Pushing to `main` builds, tests and publishes the dotnet tool to NuGet when `VersionPrefix` in
 [Skaar.NoAuth.csproj](src/Skaar.NoAuth/Skaar.NoAuth.csproj) is a new version.
+It uses NuGet trusted publishing (no API key): the workflow needs a trusted publishing policy on nuget.org
+and the `NUGET_USER` secret (the nuget.org user name).
