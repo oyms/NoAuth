@@ -13,7 +13,8 @@ namespace Skaar.NoAuth.Endpoints;
 /// <summary>
 /// The token endpoint. Supports the client_credentials, authorization_code and refresh_token grants.
 /// </summary>
-internal sealed class Token(Configuration config, ITokenRepository tokens, IWriter @out) : IEndpoint
+internal sealed class Token(Configuration config, ITokenRepository tokens, TimeProvider time, IWriter @out)
+    : IEndpoint
 {
     private static readonly TimeSpan StrictCodeLifetime = TimeSpan.FromMinutes(10);
 
@@ -38,7 +39,7 @@ internal sealed class Token(Configuration config, ITokenRepository tokens, IWrit
         {
             AccessToken = tokenSet.AccessToken.ToString(),
             TokenType = "Bearer",
-            ExpiresIn = (long)Math.Floor((tokenSet.AccessToken.Expires - DateTimeOffset.Now).TotalSeconds),
+            ExpiresIn = (long)Math.Floor((tokenSet.AccessToken.Expires - time.GetUtcNow()).TotalSeconds),
             Scope = tokenSet.AccessToken.ScopeString,
             IdToken = tokenSet.IdToken?.ToString(),
             tokenSet.AccessToken.RefreshToken
@@ -67,7 +68,7 @@ internal sealed class Token(Configuration config, ITokenRepository tokens, IWrit
 
         if (config.Strict)
         {
-            if (DateTimeOffset.Now - grant.IssuedAt > StrictCodeLifetime)
+            if (time.GetUtcNow() - grant.IssuedAt > StrictCodeLifetime)
                 throw new OAuthException(OAuthException.InvalidGrant, "The code has expired");
             if (authorization.CodeChallenge is null && codeVerifier is not null)
                 throw new OAuthException(OAuthException.InvalidGrant, "A code_verifier was sent, but no code_challenge");

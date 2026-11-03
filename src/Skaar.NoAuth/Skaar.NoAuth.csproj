@@ -13,7 +13,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <!-- CS0436: Skaar.Fodselsnummer exposes public copies of the Skaar.ValueType types. Remove when fixed upstream. -->
         <NoWarn>$(NoWarn);CS1591;CA1822;CS0436</NoWarn>
-        <VersionPrefix>1.0.1</VersionPrefix>
+        <VersionPrefix>1.0.2</VersionPrefix>
         <Product>No Auth</Product>
         <Authors>Skaar</Authors>
         <PackageTags>OAuth OIDC Testing Fake Login Security</PackageTags>
@@ -27,7 +27,9 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
+            
             1.0.0: Initial release.
+            1.0.2: Refactoring and fixes
         </PackageReleaseNotes>
     </PropertyGroup>
 

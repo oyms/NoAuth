@@ -12,7 +12,7 @@ internal sealed class UserInfo(Configuration config, ITokenRepository tokens) : 
     public async Task Process(HttpContext context)
     {
         var user = context.Request.TryReadBearerToken(out var accessToken) &&
-                   tokens.FindAccessToken(accessToken) is { IsActive: true } token
+                   tokens.FindActiveAccessToken(accessToken) is { } token
             ? token.User
             : null;
 

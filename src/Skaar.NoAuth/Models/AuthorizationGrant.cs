@@ -5,6 +5,6 @@ namespace Skaar.NoAuth.Models;
 /// </summary>
 public record AuthorizationGrant(AuthorizationCode Code, AuthorizationRequest Request, UserProfile User)
 {
-    public DateTimeOffset IssuedAt { get; init; } = DateTimeOffset.Now;
+    public DateTimeOffset IssuedAt { get; init; }
     public bool Redeemed { get; init; }
 }

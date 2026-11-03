@@ -1,5 +1,7 @@
 # NoAuth
 
+[![NuGet Version](https://img.shields.io/nuget/v/Skaar.NoAuth.svg)](https://www.nuget.org/packages/Skaar.NoAuth)
+
 A fake OAuth2/OpenID Connect server for local development and testing.
 It grants all requests for tokens. Tokens are kept in memory only.
 

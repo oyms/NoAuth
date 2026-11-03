@@ -17,8 +17,7 @@ internal sealed class KeyRepository : IKeyRepository, IDisposable
 
     public KeyRepository()
     {
-        using var stream = typeof(KeyRepository).Assembly.GetManifestResourceStream(CertificateResource)
-                           ?? throw new InvalidOperationException($"Cannot find resource {CertificateResource}");
+        using var stream = EmbeddedResources.Open(CertificateResource);
         using var memory = new MemoryStream();
         stream.CopyTo(memory);
         certificate = X509CertificateLoader.LoadPkcs12(memory.ToArray(), string.Empty);

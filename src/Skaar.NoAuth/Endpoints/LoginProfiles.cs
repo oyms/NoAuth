@@ -6,6 +6,7 @@ using Skaar.NoAuth.Contracts;
 using Skaar.NoAuth.Extensions;
 using Skaar.NoAuth.Models;
 using Skaar.NoAuth.Serialization;
+using Skaar.NoAuth.Services;
 
 namespace Skaar.NoAuth.Endpoints;
 
@@ -74,8 +75,7 @@ internal sealed class LoginProfiles(IProfileStore profiles, Configuration config
 
     private static async Task RenderSchema(HttpContext context)
     {
-        await using var schema = typeof(LoginProfiles).Assembly.GetManifestResourceStream(SchemaResource)
-                                 ?? throw new InvalidOperationException($"Cannot find resource {SchemaResource}");
+        await using var schema = EmbeddedResources.Open(SchemaResource);
         context.Response.ContentType = "application/schema+json; charset=utf-8";
         await schema.CopyToAsync(context.Response.Body);
     }

@@ -14,7 +14,9 @@ public interface ITokenRepository
     /// </summary>
     AccessToken GetAccessToken(TokenRequestParameters request);
 
-    AccessToken? FindAccessToken(string token);
+    /// <summary>The access token, if it exists and has not expired.</summary>
+    AccessToken? FindActiveAccessToken(string token);
+
     AccessToken? FindByRefreshToken(string refreshToken);
 
     /// <summary>Issues new tokens (and a new refresh token) for a refresh token. Null if not found.</summary>

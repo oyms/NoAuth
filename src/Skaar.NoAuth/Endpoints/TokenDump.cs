@@ -6,7 +6,7 @@ using Skaar.NoAuth.Serialization;
 
 namespace Skaar.NoAuth.Endpoints;
 
-internal sealed class TokenDump(Configuration config, ITokenRepository tokens) : IEndpoint
+internal sealed class TokenDump(Configuration config, ITokenRepository tokens, TimeProvider time) : IEndpoint
 {
     public bool IsMatch(HttpRequest request) => request.IsPath(config.Paths.TokenDump);
 
@@ -19,6 +19,7 @@ internal sealed class TokenDump(Configuration config, ITokenRepository tokens) :
             return Task.CompletedTask;
         }
 
+        var now = time.GetUtcNow();
         return context.Response.Serialize(new
         {
             AccessTokens = tokens.AccessTokens.Select(t => new
@@ -27,7 +28,7 @@ internal sealed class TokenDump(Configuration config, ITokenRepository tokens) :
                 Sub = t.Subject,
                 Aud = t.Audiences,
                 Exp = t.Expires,
-                Active = t.IsActive,
+                Active = t.IsActiveAt(now),
                 t.Scopes,
                 Token = t.ToString(),
                 t.RefreshToken

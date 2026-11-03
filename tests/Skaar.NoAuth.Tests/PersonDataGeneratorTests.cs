@@ -5,7 +5,7 @@ namespace Skaar.NoAuth.Tests;
 
 public class PersonDataGeneratorTests
 {
-    private readonly PersonDataGenerator generator = new();
+    private readonly PersonDataGenerator generator = new(TimeProvider.System);
 
     [Fact]
     public void Generated_numbers_are_valid_and_within_the_bounds()

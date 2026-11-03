@@ -3,7 +3,7 @@ namespace Skaar.NoAuth.Models;
 public record IdToken(UserProfile UserProfile, string ClientId, string? Nonce, string Jwt)
 {
     public DateTimeOffset Expires { get; init; }
-    public DateTimeOffset Iat { get; init; } = DateTimeOffset.Now;
+    public DateTimeOffset Iat { get; init; }
 
     /// <summary>The access token issued together with this id token.</summary>
     public string? AccessToken { get; init; }

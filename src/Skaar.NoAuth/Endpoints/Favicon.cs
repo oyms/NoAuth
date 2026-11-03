@@ -1,6 +1,7 @@
 using Skaar.NoAuth.Config;
 using Skaar.NoAuth.Contracts;
 using Skaar.NoAuth.Extensions;
+using Skaar.NoAuth.Services;
 
 namespace Skaar.NoAuth.Endpoints;
 
@@ -13,8 +14,7 @@ internal sealed class Favicon(Configuration config) : IEndpoint
 
     public async Task Process(HttpContext context)
     {
-        await using var icon = typeof(Favicon).Assembly.GetManifestResourceStream(Resource)
-                               ?? throw new InvalidOperationException($"Cannot find {Resource}");
+        await using var icon = EmbeddedResources.Open(Resource);
         context.Response.ContentType = "image/png";
         context.Response.Headers.CacheControl = "public, max-age=86400";
         await icon.CopyToAsync(context.Response.Body);

@@ -5,23 +5,23 @@ namespace Skaar.NoAuth.Services;
 /// <summary>
 /// Writes to the console and to the log exposed by the log api.
 /// </summary>
-internal sealed class LoggingWriter(ILog log) : ConsoleWriter
+internal sealed class LoggingWriter(ILog log, TimeProvider time) : ConsoleWriter
 {
     public override void WriteInfo(string text)
     {
-        log.Add(new("Info", text));
+        log.Add(new("Info", text, time.GetUtcNow()));
         base.WriteInfo(text);
     }
 
     public override void WriteWarning(string text)
     {
-        log.Add(new("Warning", text));
+        log.Add(new("Warning", text, time.GetUtcNow()));
         base.WriteWarning(text);
     }
 
     public override void WriteError(Exception e)
     {
-        log.Add(new("Error", e.Message));
+        log.Add(new("Error", e.Message, time.GetUtcNow()));
         base.WriteError(e);
     }
 }

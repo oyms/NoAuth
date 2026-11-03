@@ -6,13 +6,13 @@ using Skaar.NoAuth.Contracts;
 
 namespace Skaar.NoAuth.Services;
 
-internal sealed class JwtBuilderFactory(Configuration config, IKeyRepository keys) : IJwtBuilderFactory
+internal sealed class JwtBuilderFactory(Configuration config, IKeyRepository keys, TimeProvider time) : IJwtBuilderFactory
 {
     private static readonly JsonWebTokenHandler Handler = new();
 
-    public IJwtBuilder NewBuilder() => new Builder(config, keys);
+    public IJwtBuilder NewBuilder() => new Builder(config, keys, time);
 
-    private sealed class Builder(Configuration config, IKeyRepository keys) : IJwtBuilder
+    private sealed class Builder(Configuration config, IKeyRepository keys, TimeProvider time) : IJwtBuilder
     {
         private readonly List<Claim> claims = [];
         private readonly List<string> audiences = [];
@@ -58,19 +58,19 @@ internal sealed class JwtBuilderFactory(Configuration config, IKeyRepository key
             subject.AddClaim(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
             if (scopes.Count > 0) subject.AddClaim(new Claim("scope", string.Join(' ', scopes)));
 
+            // An already expired token must still be issued before it expires.
+            var now = time.GetUtcNow();
+            var issuedAt = expires <= now ? expires.Value.AddMinutes(-1) : now;
             var descriptor = new SecurityTokenDescriptor
             {
                 TokenType = type,
                 Issuer = config.Issuer,
+                IssuedAt = issuedAt.UtcDateTime,
+                NotBefore = issuedAt.UtcDateTime,
                 Expires = expires?.UtcDateTime,
                 Subject = subject,
                 SigningCredentials = keys.SigningCredentials
             };
-            if (expires <= DateTimeOffset.Now)
-            {
-                // An already expired token. It must still be issued before it expires.
-                descriptor.IssuedAt = descriptor.NotBefore = expires.Value.UtcDateTime.AddMinutes(-1);
-            }
 
             if (audiences.Count == 1) descriptor.Audience = audiences[0];
             else foreach (var audience in audiences) descriptor.Audiences.Add(audience);

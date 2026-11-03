@@ -11,8 +11,7 @@ internal sealed class ViewRenderer(Configuration config)
     public async Task Render(HttpContext context, string view)
     {
         var resourceName = $"Views.{view}";
-        await using var stream = typeof(ViewRenderer).Assembly.GetManifestResourceStream(resourceName)
-                                 ?? throw new InvalidOperationException($"Cannot find view {resourceName}");
+        await using var stream = EmbeddedResources.Open(resourceName);
         using var reader = new StreamReader(stream);
         var html = new StringBuilder(await reader.ReadToEndAsync());
         foreach (var path in config.Paths.All().DistinctBy(p => p.Name))

@@ -12,7 +12,7 @@ namespace Skaar.NoAuth.Endpoints;
 /// Dynamic client registration (RFC 7591), as used by MCP clients.
 /// Every client is accepted. The metadata is not stored, since any client_id is accepted anyway.
 /// </summary>
-internal sealed class Registration(Configuration config, IWriter writer) : IEndpoint
+internal sealed class Registration(Configuration config, TimeProvider time, IWriter writer) : IEndpoint
 {
     public bool IsMatch(HttpRequest request) =>
         HttpMethods.IsPost(request.Method) && request.IsPath(config.Paths.Registration);
@@ -33,7 +33,7 @@ internal sealed class Registration(Configuration config, IWriter writer) : IEndp
         var clientId = Guid.NewGuid().ToString();
         var authMethod = metadata["token_endpoint_auth_method"]?.GetValue<string>() ?? "client_secret_basic";
         metadata["client_id"] = clientId;
-        metadata["client_id_issued_at"] = DateTimeOffset.Now.ToUnixTimeSeconds();
+        metadata["client_id_issued_at"] = time.GetUtcNow().ToUnixTimeSeconds();
         metadata["token_endpoint_auth_method"] = authMethod;
         if (authMethod != "none")
         {

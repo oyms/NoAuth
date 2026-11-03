@@ -18,7 +18,7 @@ internal sealed class Introspection(Configuration config, ITokenRepository token
         var parameters = await RequestParameters.Read(context);
         var token = parameters.GetRequired("token");
 
-        if (tokens.FindAccessToken(token) is { IsActive: true } validToken)
+        if (tokens.FindActiveAccessToken(token) is { } validToken)
         {
             await context.Response.Serialize(new
             {

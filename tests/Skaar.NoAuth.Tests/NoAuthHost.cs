@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Skaar.NoAuth.Services;
 
 namespace Skaar.NoAuth.Tests;
@@ -13,6 +15,7 @@ namespace Skaar.NoAuth.Tests;
 /// <summary>
 /// Runs NoAuth in memory. Configuration is given as command line arguments, e.g. <c>--NoAuth:Strict=true</c>.
 /// The client does not follow redirects or keep cookies, so each step of a flow can be inspected.
+/// The server uses <see cref="Time"/> as its clock, which starts at the current time and only moves when advanced.
 /// </summary>
 internal sealed class NoAuthHost : IAsyncDisposable
 {
@@ -21,9 +24,10 @@ internal sealed class NoAuthHost : IAsyncDisposable
 
     private readonly Server server;
 
-    private NoAuthHost(Server server)
+    private NoAuthHost(Server server, FakeTimeProvider time)
     {
         this.server = server;
+        Time = time;
         Client = server.App.GetTestClient();
     }
 
@@ -31,11 +35,18 @@ internal sealed class NoAuthHost : IAsyncDisposable
 
     public HttpClient Client { get; }
 
+    public FakeTimeProvider Time { get; }
+
     public static async Task<NoAuthHost> Start(params string[] args)
     {
-        var server = Server.Create(args, builder => builder.WebHost.UseTestServer());
+        var time = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        var server = Server.Create(args, builder =>
+        {
+            builder.WebHost.UseTestServer();
+            builder.Services.AddSingleton<TimeProvider>(time);
+        });
         await server.App.StartAsync(Ct);
-        return new NoAuthHost(server);
+        return new NoAuthHost(server, time);
     }
 
     public Task<HttpResponseMessage> Get(string uri, string? bearerToken = null, string? cookie = null)
