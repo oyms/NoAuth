@@ -68,11 +68,37 @@ public class DiscoveryTests
     }
 
     [Fact]
+    public async Task Configuration_after_an_absolute_profiles_path_is_used()
+    {
+        using var profiles = new ProfilesFile("""{ "logins": [] }""");
+        Path.IsPathRooted(profiles.Path).ShouldBeTrue();
+        await using var host = await NoAuthHost.Start(profiles.Path, "--NoAuth:Issuer=https://other");
+
+        var metadata = await host.GetJson("/.well-known/openid-configuration");
+
+        metadata.Str("issuer").ShouldBe("https://other");
+    }
+
+    [Fact]
     public async Task Invalid_paths_are_rejected_at_startup()
     {
         var e = await Should.ThrowAsync<InvalidOperationException>(() =>
             NoAuthHost.Start("--NoAuth:Paths:Token:0=no-slash"));
 
         e.Message.ShouldContain("Token=no-slash");
+    }
+
+    [Fact]
+    public async Task Html_pages_link_to_the_favicon()
+    {
+        await using var host = await NoAuthHost.Start();
+
+        var page = await (await host.Get("/")).Content.ReadAsStringAsync();
+        var icon = await host.Get("/favicon.png");
+
+        page.ShouldContain("<link rel=\"icon\" type=\"image/png\" href=\"/favicon.png\"/>");
+        icon.StatusCode.ShouldBe(HttpStatusCode.OK);
+        icon.Content.Headers.ContentType?.MediaType.ShouldBe("image/png");
+        (await icon.Content.ReadAsByteArrayAsync()).Length.ShouldBeGreaterThan(0);
     }
 }

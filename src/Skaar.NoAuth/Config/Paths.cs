@@ -6,6 +6,7 @@ namespace Skaar.NoAuth.Config;
 public record Paths
 {
     public string FrontPage { get; set; } = string.Empty;
+    public string Favicon { get; set; } = string.Empty;
     public string Discovery { get; set; } = string.Empty;
     public string AuthorizationServerMetadata { get; set; } = string.Empty;
     public string Jwks { get; set; } = string.Empty;

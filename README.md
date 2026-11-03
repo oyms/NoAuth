@@ -3,6 +3,8 @@
 A fake OAuth2/OpenID Connect server for local development and testing.
 It grants all requests for tokens. Tokens are kept in memory only.
 
+![Icon](https://raw.githubusercontent.com/oyms/NoAuth/refs/heads/main/resources/logo.svg)
+
 ## Run as a dotnet tool
 
 ```shell
@@ -98,6 +100,7 @@ overridden with environment variables (`NoAuth__Issuer=...`) or command line arg
 | Path                                     | Description                                                              |
 |------------------------------------------|--------------------------------------------------------------------------|
 | `/.well-known/openid-configuration`      | Discovery document.                                                      |
+| `/favicon.png`                           | The icon of the html pages.                                              |
 | `/.well-known/oauth-authorization-server` | Authorization server metadata (RFC 8414). Same document as discovery.   |
 | `/.well-known/openid-configuration/jwks` | Signing keys.                                                            |
 | `/connect/token`, `/v1/oauth2/tokens`    | Token endpoint (`client_credentials`, `authorization_code`, `refresh_token`). |

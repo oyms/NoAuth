@@ -28,9 +28,10 @@ public sealed class Server : IAsyncDisposable
     /// <param name="configureBuilder">Additional configuration of the builder, e.g. a test server.</param>
     public static Server Create(string[] args, Action<WebApplicationBuilder>? configureBuilder = null)
     {
+        var (profileSource, configurationArgs) = ProfileSource.FromArgs(args);
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
-            Args = args,
+            Args = configurationArgs,
             ContentRootPath = AppContext.BaseDirectory
         });
         builder.Logging.ClearProviders();
@@ -43,7 +44,7 @@ public sealed class Server : IAsyncDisposable
         var listensOnBaseUrl = string.IsNullOrWhiteSpace(builder.Configuration[WebHostDefaults.ServerUrlsKey]);
         if (listensOnBaseUrl) builder.WebHost.UseUrls(configuration.BaseUrl.AbsoluteUri);
 
-        builder.Services.AddNoAuth(configuration, ProfileSource.Resolve(args));
+        builder.Services.AddNoAuth(configuration, profileSource);
         configureBuilder?.Invoke(builder);
 
         var app = builder.Build();

@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddEndpoints(this IServiceCollection services) =>
         services
             .AddSingleton<IEndpoint, FrontPage>()
+            .AddSingleton<IEndpoint, Favicon>()
             .AddSingleton<IEndpoint, Discovery>()
             .AddSingleton<IEndpoint, Jwks>()
             .AddSingleton<IEndpoint, Token>()

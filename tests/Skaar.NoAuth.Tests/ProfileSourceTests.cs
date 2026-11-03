@@ -29,6 +29,16 @@ public class ProfileSourceTests
     }
 
     [Fact]
+    public void The_profiles_path_is_removed_from_the_configuration_arguments()
+    {
+        var (source, configurationArgs) =
+            ProfileSource.FromArgs(["--NoAuth:Strict=true", "/tmp/profiles.json", "--NoAuth:Issuer=x"]);
+
+        source.FilePath.ShouldBe(Path.GetFullPath("/tmp/profiles.json"));
+        configurationArgs.ShouldBe(["--NoAuth:Strict=true", "--NoAuth:Issuer=x"]);
+    }
+
+    [Fact]
     public void Without_arguments_the_default_file_name_is_used() =>
         Path.GetFileName(ProfileSource.Resolve([]).FilePath).ShouldBe(ProfileSource.FileName);
 }

@@ -24,6 +24,7 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
             1.0.0: Initial release.
         </PackageReleaseNotes>
@@ -47,6 +48,8 @@
     <ItemGroup>
         <EmbeddedResource Include="Cert\selfsign.pfx" LogicalName="Cert.selfsign.pfx" />
         <EmbeddedResource Include="Endpoints\Views\*.html" LogicalName="Views.%(Filename)%(Extension)" />
+        <EmbeddedResource Include="Endpoints\Views\favicon.png" LogicalName="Views.favicon.png" />
+        <None Include="Endpoints\Views\favicon.png" Pack="true" PackagePath="icon.png" Visible="false" />
         <EmbeddedResource Include="loginProfiles.schema.json" LogicalName="loginProfiles.schema.json" />
     </ItemGroup>
 
