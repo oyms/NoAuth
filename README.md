@@ -3,7 +3,7 @@
 A fake OAuth2/OpenID Connect server for local development and testing.
 It grants all requests for tokens. Tokens are kept in memory only.
 
-![Icon](https://raw.githubusercontent.com/oyms/NoAuth/refs/heads/main/resources/logo.svg)
+![Icon](./resources/icon.svg)
 
 ## Run as a dotnet tool
 
