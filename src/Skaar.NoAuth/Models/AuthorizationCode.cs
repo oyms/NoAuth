@@ -1,16 +1,10 @@
+using Skaar.ValueType;
+
 namespace Skaar.NoAuth.Models;
 
-public readonly record struct AuthorizationCode(Guid Value)
+[ValueType<Guid>]
+public partial struct AuthorizationCode
 {
+    public bool IsValid => _value != Guid.Empty;
     public static AuthorizationCode NewCode() => new(Guid.NewGuid());
-
-    public bool IsValid => Value != Guid.Empty;
-
-    public override string ToString() => Value.ToString();
-
-    public static bool TryParse(string? code, out AuthorizationCode result)
-    {
-        result = Guid.TryParse(code, out var guid) ? new AuthorizationCode(guid) : default;
-        return result.IsValid;
-    }
 }

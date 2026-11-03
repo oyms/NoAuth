@@ -207,7 +207,7 @@ internal sealed class TokenRepository(
         var expires = DateTimeOffset.Now + DefaultTtl;
         var builder = jwtBuilder.NewBuilder()
             .Aud(clientId)
-            .Sub(user.Uid.ToString())
+            .Sub(user.Uid)
             .Exp(expires);
         foreach (var claim in user.AllClaims()) builder.Claim(claim);
         if (nonce is not null) builder.Claim(new Claim("nonce", nonce));

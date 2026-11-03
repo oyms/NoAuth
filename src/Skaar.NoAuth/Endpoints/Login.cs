@@ -49,7 +49,7 @@ internal sealed class Login(
 
         var fallback = userData.GenerateRandomProfile();
         var user = new UserProfile(
-            Fodselsnummer.TryParse(parameters.GetOptional("uid"), out var uid) ? uid : fallback.Uid,
+            (parameters.GetOptional("uid")?.Trim()).WithFallback(fallback.Uid),
             parameters.GetOptional("given_name").WithFallback(fallback.GivenName),
             parameters.GetOptional("family_name").WithFallback(fallback.FamilyName))
         {

@@ -48,7 +48,7 @@ internal sealed class Token(Configuration config, ITokenRepository tokens, IWrit
     private TokenSet RedeemAuthorizationCode(RequestParameters parameters, HttpRequest request)
     {
         var requestedCode = parameters.GetRequired("code");
-        var grant = (AuthorizationCode.TryParse(requestedCode, out var code)
+        var grant = (AuthorizationCode.TryParse(requestedCode, null, out var code)
                         ? tokens.FindAuthorizationGrant(code)
                         : null)
                     ?? throw new OAuthException(OAuthException.InvalidGrant, $"Unknown code {requestedCode}");

@@ -93,12 +93,12 @@ public class DiscoveryTests
     {
         await using var host = await NoAuthHost.Start();
 
-        var page = await (await host.Get("/")).Content.ReadAsStringAsync();
+        var page = await (await host.Get("/")).Content.ReadAsStringAsync(NoAuthHost.Ct);
         var icon = await host.Get("/favicon.png");
 
         page.ShouldContain("<link rel=\"icon\" type=\"image/png\" href=\"/favicon.png\"/>");
         icon.StatusCode.ShouldBe(HttpStatusCode.OK);
         icon.Content.Headers.ContentType?.MediaType.ShouldBe("image/png");
-        (await icon.Content.ReadAsByteArrayAsync()).Length.ShouldBeGreaterThan(0);
+        (await icon.Content.ReadAsByteArrayAsync(NoAuthHost.Ct)).Length.ShouldBeGreaterThan(0);
     }
 }

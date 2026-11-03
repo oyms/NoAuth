@@ -25,7 +25,7 @@ internal sealed class UserInfo(Configuration config, ITokenRepository tokens) : 
 
         var body = new Dictionary<string, object>
         {
-            ["sub"] = user.Uid.ToString(),
+            ["sub"] = user.Uid,
             ["name"] = user.Name,
             ["given_name"] = user.GivenName,
             ["family_name"] = user.FamilyName

@@ -10,6 +10,6 @@ internal sealed class UserDataFactory(PersonDataGenerator dataGenerator) : IUser
     {
         var fodselsnummer = dataGenerator.GenerateRandomFodselsnummer();
         var (firstName, familyName) = dataGenerator.GenerateName(fodselsnummer);
-        return new UserProfile(fodselsnummer, firstName, familyName);
+        return new UserProfile(fodselsnummer.ToString(), firstName, familyName);
     }
 }

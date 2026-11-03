@@ -26,6 +26,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.14" />
       <PackageReference Include="Shouldly" Version="4.3.0" />
+      <PackageReference Include="Skaar.ValueType" Version="3.0.1" />
       <PackageReference Include="xunit.v3" Version="4.0.2" />
     </ItemGroup>
 

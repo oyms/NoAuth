@@ -182,6 +182,22 @@ public class AuthorizationCodeTests
         userInfo.Strings("department").ShouldBe(["sales"]);
     }
 
+    [Theory]
+    [InlineData("alice", "alice")]
+    [InlineData(" 1234567 ", "1234567")]
+    [InlineData("", null)]
+    public async Task Any_user_id_is_accepted_and_an_empty_one_is_generated(string uid, string? expected)
+    {
+        await using var host = await NoAuthHost.Start();
+        var redirect = await host.LogIn(uid: uid);
+
+        var tokens = await NoAuthHost.Json(await host.ExchangeCode(redirect["code"]));
+
+        var subject = new JsonWebToken(tokens.Str("id_token")).Subject;
+        if (expected is null) Fodselsnummer.Parse(subject, null).IsValid.ShouldBeTrue();
+        else subject.ShouldBe(expected);
+    }
+
     [Fact]
     public async Task Without_a_logout_page_the_session_ends_without_a_redirect()
     {

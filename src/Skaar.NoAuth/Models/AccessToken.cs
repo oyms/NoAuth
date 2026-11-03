@@ -15,7 +15,7 @@ public record AccessToken(string ClientId, string Token)
     public string ScopeString => string.Join(' ', Scopes);
 
     /// <summary>The token subject: the user for user tokens, otherwise the client (RFC 9068).</summary>
-    public string Subject => User?.Uid.ToString() ?? ClientId;
+    public string Subject => User?.Uid ?? ClientId;
 
     public override string ToString() => Token;
 }
