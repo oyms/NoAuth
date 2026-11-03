@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Login profiles for NoAuth",
+  "description": "This defines the format for the Oidc profiles to use as templates",
+  "$id": "https://github.com/oyms/NoAuth/loginProfiles.schema.json",
+  "type": "object",
+  "properties": {
+    "clients" : {
+      "type": "object",
+      "description": "The list of extra claims granted to specific client_id",
+      "patternProperties": {
+        ".": {
+          "type": "object",
+          "description": "A predefined client by client_id",
+          "patternProperties": {
+            ".": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "The claim value"
+              },
+              "description": "A claim to grant to the client. Use 'scope' to add scope."
+            }
+          }
+        }
+      }
+    },
+    "logins": {
+      "type": "array",
+      "description":  "The list of OIDC profiles.",
+      "items": {
+        "type": "object",
+        "description": "A template for user profiles to login with. Properties that are not defined, are generated.",
+        "properties": {
+          "profileName" : {
+            "type": "string",
+            "description": "The display name of the profile. This should be unique, to be used as an identifier."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the profile"
+          },
+          "category": {
+            "type": "string",
+            "description": "A category for grouping templates"
+          },
+          "given_name": {
+            "type": "string",
+            "description": "The given name of the user profile generated."
+          },
+          "family_name": {
+            "type": "string",
+            "description": "The family name of the user profile generated."
+          },
+          "uid": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 15,
+            "description": "The user id of the user profile generated."
+          },
+          "claims": {
+            "type": "object",
+            "patternProperties": {
+              ".": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "The claim value"
+                },
+                "description": "A claim to add to the user profile generated."
+              },
+              "description": "A required list of claims to add to the user profile generated."
+            }
+          }
+
+        },
+        "required": ["profileName", "claims"]
+      }
+    }
+  },
+  "required": ["logins"]
+}

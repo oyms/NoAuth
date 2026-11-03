@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".github/workflows/nuget-publish.yml" />
+    <File Path="compose.yaml" />
+    <File Path="Dockerfile" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+    <File Path="scripts/create-certs.sh" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Skaar.NoAuth/Skaar.NoAuth.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Skaar.NoAuth.Tests/Skaar.NoAuth.Tests.csproj" />
+  </Folder>
+</Solution>

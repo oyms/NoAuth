@@ -52,3 +52,13 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Local certificates (see scripts/create-certs.sh)
+certs/
+
+# IDE and OS files
+.idea/
+.vs/
+.vscode/
+*.user
+.DS_Store

@@ -1,0 +1,70 @@
+{
+  "$schema": "./loginProfiles.schema.json",
+  "logins": [
+    {
+      "profileName": "Administrator",
+      "description": "Full access",
+      "category": "Administration",
+      "given_name": "Ada",
+      "family_name": "Admin",
+      "uid": "02029404855",
+      "claims": {
+        "role": [ "admin", "user" ],
+        "email": [ "ada.admin@example.com" ],
+        "email_verified": [ "true" ]
+      }
+    },
+    {
+      "profileName": "Manager",
+      "description": "Member of two groups",
+      "category": "Users",
+      "given_name": "Mona",
+      "family_name": "Manager",
+      "uid": "17046204441",
+      "claims": {
+        "role": [ "manager", "user" ],
+        "groups": [ "sales", "support" ],
+        "email": [ "mona.manager@example.com" ],
+        "email_verified": [ "true" ]
+      }
+    },
+    {
+      "profileName": "User",
+      "description": "A regular user",
+      "category": "Users",
+      "given_name": "Ola",
+      "family_name": "Nordmann",
+      "uid": "12106346508",
+      "claims": {
+        "role": [ "user" ],
+        "email": [ "ola.nordmann@example.com" ],
+        "email_verified": [ "true" ],
+        "locale": [ "nb-NO" ]
+      }
+    },
+    {
+      "profileName": "Read-only user",
+      "description": "Can read, but not change anything",
+      "category": "Users",
+      "given_name": "Kari",
+      "family_name": "Nordmann",
+      "uid": "03098703046",
+      "claims": {
+        "role": [ "reader" ],
+        "email": [ "kari.nordmann@example.com" ],
+        "email_verified": [ "false" ]
+      }
+    },
+    {
+      "profileName": "Guest",
+      "description": "A user without any extra claims",
+      "category": "Other",
+      "claims": {}
+    }
+  ],
+  "clients": {
+    "test_client": {
+      "scope": [ "api.read", "api.write" ]
+    }
+  }
+}

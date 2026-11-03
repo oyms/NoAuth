@@ -1,0 +1,21 @@
+# NoAuth with HTTPS. Create the certificates first: ./scripts/create-certs.sh
+#
+# From the host:             https://localhost:8443
+# From other containers:     https://noauth:8443 (trust certs/rootCA.pem in those containers)
+services:
+  noauth:
+    build: .
+    image: noauth
+    ports:
+      - "8443:8443"
+    environment:
+      ASPNETCORE_URLS: https://+:8443
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /certs/noauth.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: changeit
+      NoAuth__BaseUrl: https://localhost:8443
+      # Urls in the discovery document follow the name the client used (localhost or noauth).
+      NoAuth__DeriveUrlsFromRequest: "true"
+    volumes:
+      - ./certs:/certs:ro
+      # Use your own login profiles:
+      # - ./loginProfiles.json:/app/loginProfiles.json:ro

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>NoAuth</title>
+</head>
+<body>
+<h1>NoAuth</h1>
+<p>A fake OAuth2/OpenID Connect server for local development and testing.</p>
+<h2>Discovery</h2>
+<menu>
+    <li><a href="{Discovery}">OpenID configuration</a></li>
+    <li><a href="{AuthorizationServerMetadata}">OAuth authorization server metadata</a></li>
+    <li><a href="{Jwks}">JSON web key set</a></li>
+</menu>
+<h2>Api</h2>
+<menu>
+    <li><a href="{TokenDump}" target="_blank">All stored tokens</a></li>
+    <li><a href="{LogDump}" target="_blank">Log</a></li>
+    <li><a href="{ConfigDump}" target="_blank">Configuration</a></li>
+    <li><a href="{LoginProfile}" target="_blank">Login profiles</a></li>
+    <li><a href="{LoginProfile}/schema.json" target="_blank">Login profiles schema</a></li>
+    <li><a href="{TokenRequestApi}?client_id=test_client&scope=api.read" target="_blank">Token request</a></li>
+</menu>
+</body>
+</html>
