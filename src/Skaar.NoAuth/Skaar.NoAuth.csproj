@@ -11,9 +11,8 @@
         <ToolCommandName>noauth</ToolCommandName>
         <Description>A fake OAuth2/OpenID Connect server to run locally.</Description>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <!-- CS0436: Skaar.Fodselsnummer exposes public copies of the Skaar.ValueType types. Remove when fixed upstream. -->
-        <NoWarn>$(NoWarn);CS1591;CA1822;CS0436</NoWarn>
-        <VersionPrefix>1.0.2</VersionPrefix>
+        <NoWarn>$(NoWarn);CS1591;CA1822</NoWarn>
+        <VersionPrefix>1.0.3</VersionPrefix>
         <Product>No Auth</Product>
         <Authors>Skaar</Authors>
         <PackageTags>OAuth OIDC Testing Fake Login Security</PackageTags>
@@ -30,6 +29,7 @@
             
             1.0.0: Initial release.
             1.0.2: Refactoring and fixes
+            1.0.3: Update dependencies
         </PackageReleaseNotes>
     </PropertyGroup>
 
@@ -58,8 +58,8 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
-      <PackageReference Include="Skaar.Fodselsnummer" Version="2.1.0" />
-      <PackageReference Include="Skaar.ValueType" Version="3.0.1" />
+      <PackageReference Include="Skaar.Fodselsnummer" Version="2.1.1" />
+      <PackageReference Include="Skaar.ValueType" Version="4.0.0" />
     </ItemGroup>
 
 </Project>
