@@ -17,5 +17,6 @@ services:
       NoAuth__DeriveUrlsFromRequest: "true"
     volumes:
       - ./certs:/certs:ro
-      # Use your own login profiles:
+      # Use your own settings and login profiles:
+      # - ./noauth.json:/app/noauth.json:ro
       # - ./loginProfiles.json:/app/loginProfiles.json:ro

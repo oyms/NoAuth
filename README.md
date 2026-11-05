@@ -82,8 +82,29 @@ RUN update-ca-certificates
 
 ## Configuration
 
-All settings are in the `NoAuth` section of [appsettings.json](src/Skaar.NoAuth/appsettings.json), and can be
-overridden with environment variables (`NoAuth__Issuer=...`) or command line arguments (`--NoAuth:Issuer=...`).
+All settings are in the `NoAuth` section. The defaults are in [appsettings.json](src/Skaar.NoAuth/appsettings.json),
+which is installed with the application and should not be edited. Override them, from lowest to highest precedence, with:
+
+1. A settings file: `noauth.json` in the working directory, or the file given with `--config <file>`.
+   Only the settings you want to change are needed:
+   ```json
+   {
+     "NoAuth": {
+       "Issuer": "https://my-issuer",
+       "Strict": true
+     }
+   }
+   ```
+2. Environment variables, e.g. `NoAuth__Issuer=https://my-issuer`.
+3. Command line arguments, e.g. `--NoAuth:Issuer=https://my-issuer`.
+
+The settings file in use is shown when the server starts, and the resulting configuration at `/api/configuration`.
+
+- **Global tool:** run `noauth` from a folder with a `noauth.json`, or use `noauth --config ~/noauth.json`.
+- **Local tool:** put `noauth.json` (and `loginProfiles.json`) in the folder you run `dotnet noauth` from,
+  e.g. the repository root next to `.config/dotnet-tools.json`, and commit them.
+- **Container:** use environment variables, or mount a settings file:
+  `-v ./noauth.json:/app/noauth.json:ro` (the working directory is `/app`).
 
 | Setting                         | Description                                                                           |
 |---------------------------------|---------------------------------------------------------------------------------------|

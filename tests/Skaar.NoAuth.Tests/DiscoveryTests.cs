@@ -70,7 +70,7 @@ public class DiscoveryTests
     [Fact]
     public async Task Configuration_after_an_absolute_profiles_path_is_used()
     {
-        using var profiles = new ProfilesFile("""{ "logins": [] }""");
+        using var profiles = new JsonFile("""{ "logins": [] }""");
         Path.IsPathRooted(profiles.Path).ShouldBeTrue();
         await using var host = await NoAuthHost.Start(profiles.Path, "--NoAuth:Issuer=https://other");
 

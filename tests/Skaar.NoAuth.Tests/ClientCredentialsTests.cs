@@ -94,7 +94,7 @@ public class ClientCredentialsTests
     [Fact]
     public async Task Predefined_client_claims_are_added()
     {
-        using var profiles = new ProfilesFile("""
+        using var profiles = new JsonFile("""
             { "logins": [], "clients": { "known_client": { "scope": [ "extra" ], "tenant": [ "acme" ] } } }
             """);
         await using var host = await NoAuthHost.Start(profiles.Path);
@@ -199,7 +199,7 @@ public class ClientCredentialsTests
     [Fact]
     public async Task Reserved_claims_in_client_profiles_are_ignored()
     {
-        using var profiles = new ProfilesFile("""
+        using var profiles = new JsonFile("""
             { "logins": [], "clients": { "c": { "sub": [ "x" ], "aud": [ "y" ], "tenant": [ "acme" ] } } }
             """);
         await using var host = await NoAuthHost.Start(profiles.Path);

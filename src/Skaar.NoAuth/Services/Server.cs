@@ -20,7 +20,8 @@ public sealed class Server : IAsyncDisposable
     public Configuration Configuration { get; }
 
     /// <summary>
-    /// Configuration is read from appsettings.json, environment variables and command line arguments.
+    /// Configuration is read from appsettings.json, the <see cref="SettingsFile"/>, environment variables and
+    /// command line arguments.
     /// The server listens to <see cref="Config.Configuration.BaseUrl"/>, unless urls are set explicitly
     /// (e.g. with ASPNETCORE_URLS when running in a container).
     /// </summary>
@@ -35,6 +36,7 @@ public sealed class Server : IAsyncDisposable
             ContentRootPath = AppContext.BaseDirectory
         });
         builder.Logging.ClearProviders();
+        var settingsFile = SettingsFile.Add(builder.Configuration);
 
         var configuration = builder.Configuration.GetSection(Configuration.SectionName).Get<Configuration>()
                             ?? throw new InvalidOperationException(
@@ -50,7 +52,7 @@ public sealed class Server : IAsyncDisposable
         var app = builder.Build();
         app.UseNoAuth();
         app.Lifetime.ApplicationStarted.Register(() =>
-            RenderStatus(app.Services.GetRequiredService<IWriter>(), configuration, app.Urls));
+            RenderStatus(app.Services.GetRequiredService<IWriter>(), configuration, settingsFile, app.Urls));
 
         return new Server(app, configuration, listensOnBaseUrl);
     }
@@ -76,7 +78,8 @@ public sealed class Server : IAsyncDisposable
         }
     }
 
-    private static void RenderStatus(IWriter writer, Configuration configuration, IEnumerable<string> urls)
+    private static void RenderStatus(IWriter writer, Configuration configuration, string? settingsFile,
+        IEnumerable<string> urls)
     {
         const int lineLength = 30;
         var bld = new StringBuilder();
@@ -85,7 +88,13 @@ public sealed class Server : IAsyncDisposable
         bld.AppendLine(new string('-', lineLength));
         bld.AppendLine($"{"Listening:".PadRight(lineLength)} {string.Join(", ", urls)}");
         bld.AppendLine($"{"Issuer:".PadRight(lineLength)} {configuration.Issuer}");
+        if (settingsFile is not null) bld.AppendLine($"{"Settings:".PadRight(lineLength)} {settingsFile}");
         BuildStatusString(bld, configuration, lineLength);
+        if (!Console.IsInputRedirected)
+        {
+            bld.AppendLine(new string('-', lineLength));
+            bld.AppendLine("Press Ctrl+C to stop the server");
+        }
         bld.AppendLine(new string('=', lineLength));
         writer.WriteInfo(bld.ToString());
     }
