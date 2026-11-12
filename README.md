@@ -117,6 +117,9 @@ The settings file in use is shown when the server starts, and the resulting conf
 | `Strict`                        | Enforce OAuth 2.1 rules that are relaxed by default (see below).                      |
 | `DeriveUrlsFromRequest`         | Use the scheme and host of each request (not `BaseUrl`) in discovery and redirects.   |
 | `TokenTtlInSeconds`             | Lifetime of issued tokens.                                                            |
+| `Entra:Enabled`                 | Act like Microsoft Entra ID (Azure AD). See below.                                    |
+| `Entra:TenantId`                | The tenant id (`tid`) of the Entra mode.                                              |
+| `Entra:Domain`                  | The domain of generated `preferred_username` claims, for users without an email.     |
 
 ## Endpoints (default paths)
 
@@ -165,6 +168,40 @@ By default NoAuth is lenient. With `Strict` enabled:
 - The `client_id` and `redirect_uri` of the token request must match the authorization request.
 - Refresh tokens can only be used by the client they were issued to.
 - A `code_verifier` without a `code_challenge` is rejected, and `resource` must be an absolute uri.
+
+## Microsoft Entra ID (Azure AD)
+
+With `Entra:Enabled`, NoAuth acts like Entra ID v2.0, so apps using Microsoft.Identity.Web (or other Entra
+libraries) can use it by changing the instance:
+
+```json
+"AzureAd": {
+  "Instance": "https://localhost:44367/",
+  "TenantId": "1d7a9b2e-6c35-4f0a-9e48-3b5c2a7d8f61",
+  "ClientId": "<the client id of your api>"
+}
+```
+
+- **Tenant paths:** `/{tenant}/v2.0/.well-known/openid-configuration`, `/{tenant}/oauth2/v2.0/authorize`,
+  `/{tenant}/oauth2/v2.0/token`, `/{tenant}/oauth2/v2.0/logout` and `/{tenant}/discovery/v2.0/keys` are served
+  in addition to the normal paths. Any tenant is accepted (a tenant id, a domain, `common`, `organizations`).
+- **Issuer:** `{BaseUrl}/{TenantId}/v2.0` (the `Issuer` setting is not used). The discovery document of
+  `common`, `organizations` and `consumers` has `{tenantid}` in the issuer, as Entra does.
+- **Audience from scopes:** without a `resource`, the audience is given by the scopes:
+  `api://{guid}/access_as_user` and `api://{guid}/.default` give `{guid}`, `api://my-api/read` gives `api://my-api`,
+  and scopes without a resource (`User.Read`) give `https://graph.microsoft.com`.
+- **Claims:** access tokens have `ver`, `tid`, `oid`, `azp`, `preferred_username` and `scp` (the scope names, without
+  the resource and `.default`) instead of `scope` and `client_id`, and the `typ` is `JWT`. Id tokens have `ver`, `tid`,
+  `oid` and `preferred_username`. App tokens (client credentials) have `idtyp: app` and no `scp`.
+  `oid` is derived from the `uid` (or is the `uid`, if it is a guid), and `preferred_username` is the `email` claim
+  or `given.family@{Domain}`. Claims of the same type in login or client profiles override them, e.g. an `oid`.
+- **App roles:** add `roles` to a client profile (for app tokens) or login profile (for users).
+  Microsoft.Identity.Web rejects tokens with neither `scp` nor `roles`.
+- **MSAL:** `client_info` is returned from the token endpoint when requested with `client_info=1`. A refresh with a
+  `scope` gives a token for those scopes, so one refresh token can be used for several apis, as MSAL does.
+
+Tested with Microsoft.Identity.Web web apis (`AddMicrosoftIdentityWebApi`, `RequiredScope` and roles).
+Not supported yet: the `form_post` and `fragment` response modes, the on-behalf-of grant, and Microsoft Graph.
 
 ## Login and client profiles
 

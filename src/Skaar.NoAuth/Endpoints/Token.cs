@@ -13,8 +13,12 @@ namespace Skaar.NoAuth.Endpoints;
 /// <summary>
 /// The token endpoint. Supports the client_credentials, authorization_code and refresh_token grants.
 /// </summary>
-internal sealed class Token(Configuration config, ITokenRepository tokens, TimeProvider time, IWriter @out)
-    : IEndpoint
+internal sealed class Token(
+    Configuration config,
+    ITokenRepository tokens,
+    EntraClaims entra,
+    TimeProvider time,
+    IWriter @out) : IEndpoint
 {
     private static readonly TimeSpan StrictCodeLifetime = TimeSpan.FromMinutes(10);
 
@@ -42,9 +46,16 @@ internal sealed class Token(Configuration config, ITokenRepository tokens, TimeP
             ExpiresIn = (long)Math.Floor((tokenSet.AccessToken.Expires - time.GetUtcNow()).TotalSeconds),
             Scope = tokenSet.AccessToken.ScopeString,
             IdToken = tokenSet.IdToken?.ToString(),
-            tokenSet.AccessToken.RefreshToken
+            tokenSet.AccessToken.RefreshToken,
+            ClientInfo = ClientInfo(parameters, tokenSet.AccessToken)
         });
     }
+
+    /// <summary>The Entra <c>client_info</c>, when requested with <c>client_info=1</c> (as MSAL does).</summary>
+    private string? ClientInfo(RequestParameters parameters, AccessToken token) =>
+        entra.Enabled && token.User is not null && parameters.GetOptional("client_info") == "1"
+            ? entra.ClientInfo(token.User)
+            : null;
 
     private TokenSet RedeemAuthorizationCode(RequestParameters parameters, HttpRequest request)
     {
@@ -94,7 +105,9 @@ internal sealed class Token(Configuration config, ITokenRepository tokens, TimeP
         if (config.Strict && ReadClientCredentials(parameters, request)?.ClientId != existing.ClientId)
             throw new OAuthException(OAuthException.InvalidGrant, "The refresh_token was issued to another client");
 
-        return tokens.Refresh(refreshToken)
+        // With Entra, MSAL uses one refresh token for all apis, requesting the scopes of the api it needs.
+        var scopes = entra.Enabled ? parameters.GetOptional("scope").ParseScopeString() : null;
+        return tokens.Refresh(refreshToken, scopes)
                ?? throw new OAuthException(OAuthException.InvalidGrant, "Unknown refresh_token");
     }
 

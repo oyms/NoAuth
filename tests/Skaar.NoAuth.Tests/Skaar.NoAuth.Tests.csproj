@@ -26,8 +26,9 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.14" />
       <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
+      <PackageReference Include="Microsoft.Identity.Web" Version="4.18.0" />
       <PackageReference Include="Shouldly" Version="4.3.0" />
-      <PackageReference Include="xunit.v3" Version="4.0.2" />
+      <PackageReference Include="xunit.v3" Version="4.0.3" />
     </ItemGroup>
 
 </Project>

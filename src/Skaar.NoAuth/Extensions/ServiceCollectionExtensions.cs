@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IWriter, LoggingWriter>()
             .AddSingleton<IKeyRepository, KeyRepository>()
             .AddSingleton<IJwtBuilderFactory, JwtBuilderFactory>()
+            .AddSingleton<EntraClaims>()
             .AddSingleton<TokenIssuer>()
             .AddSingleton<ITokenRepository, TokenRepository>()
             .AddSingleton<IProfileStore, ProfileStore>()

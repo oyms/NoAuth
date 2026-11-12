@@ -37,6 +37,9 @@ internal sealed class NoAuthHost : IAsyncDisposable
 
     public FakeTimeProvider Time { get; }
 
+    /// <summary>A handler sending requests to the server, e.g. as the backchannel of another app.</summary>
+    public HttpMessageHandler CreateHandler() => server.App.GetTestServer().CreateHandler();
+
     public static async Task<NoAuthHost> Start(params string[] args)
     {
         var time = new FakeTimeProvider(DateTimeOffset.UtcNow);
@@ -97,7 +100,10 @@ internal sealed class NoAuthHost : IAsyncDisposable
         return Query(login.Headers.Location!);
     }
 
-    public static string AuthorizeUri(PkcePair? pkce = null, params (string Key, string Value)[] parameters)
+    public static string AuthorizeUri(PkcePair? pkce = null, params (string Key, string Value)[] parameters) =>
+        AuthorizeUri("/connect/authorize", pkce, parameters);
+
+    public static string AuthorizeUri(string path, PkcePair? pkce, params (string Key, string Value)[] parameters)
     {
         var query = new Dictionary<string, string?>
         {
@@ -115,7 +121,7 @@ internal sealed class NoAuthHost : IAsyncDisposable
         }
 
         foreach (var (key, value) in parameters) query[key] = value;
-        return QueryHelpers.AddQueryString("/connect/authorize", query);
+        return QueryHelpers.AddQueryString(path, query);
     }
 
     /// <summary>Exchanges a code with the authorization code grant.</summary>

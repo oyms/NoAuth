@@ -13,6 +13,7 @@ internal sealed class TokenIssuer(
     IJwtBuilderFactory jwtBuilder,
     Configuration config,
     IProfileStore profiles,
+    EntraClaims entra,
     TimeProvider time)
 {
     private const string ScopeClaim = "scope";
@@ -25,6 +26,11 @@ internal sealed class TokenIssuer(
     /// <summary>The requested scopes, and the scopes predefined for the client.</summary>
     public IReadOnlyCollection<string> ResolveScopes(string clientId, IEnumerable<string> requested) =>
         requested.Union(PredefinedClaims(clientId).TryGetValue(ScopeClaim, out var scopes) ? scopes : []).ToList();
+
+    /// <summary>The requested audiences. With Entra, audiences are otherwise given by the scopes.</summary>
+    public IReadOnlyCollection<string> ResolveAudiences(IReadOnlyCollection<string> requested,
+        IEnumerable<string> scopes) =>
+        requested.Count == 0 && entra.Enabled ? entra.Audiences(scopes) : requested;
 
     public AccessToken CreateAccessToken(string clientId, IReadOnlyCollection<string> audiences,
         IReadOnlyCollection<string> scopes, UserProfile? user, TimeSpan ttl)
@@ -52,6 +58,7 @@ internal sealed class TokenIssuer(
             .Exp(expires);
         foreach (var claim in user.AllClaims()) builder.Claim(claim);
         if (nonce is not null) builder.Claim(new Claim("nonce", nonce));
+        if (entra.Enabled) AddDefaults(builder, entra.IdTokenClaims(user), user.AllClaims());
 
         return new IdToken(user, clientId, nonce, builder.Build())
         {
@@ -62,22 +69,38 @@ internal sealed class TokenIssuer(
         };
     }
 
-    /// <summary>A JWT access token as profiled in RFC 9068, or a reference token.</summary>
+    /// <summary>
+    /// A JWT access token as profiled in RFC 9068, an Entra v2.0 access token, or a reference token.
+    /// </summary>
     private string CreateAccessTokenJwt(AccessToken token)
     {
         if (config.UseReferenceTokens) return Guid.NewGuid().ToString();
         var builder = jwtBuilder.NewBuilder()
-            .Type(AccessTokenType)
             .Aud(token.Audiences.Count > 0 ? token.Audiences : [token.ClientId])
             .Sub(token.Subject)
-            .Claim(new Claim("client_id", token.ClientId))
             .Exp(token.Expires);
-        foreach (var scope in token.Scopes) builder.Scope(scope);
-        foreach (var claim in token.User?.AllClaims() ?? []) builder.Claim(claim);
-        foreach (var (type, values) in PredefinedClaims(token.ClientId).Where(c => !ReservedClaims.IsReserved(c.Key)))
-        foreach (var value in values)
-            builder.Claim(new Claim(type, value));
+        if (!entra.Enabled)
+        {
+            builder.Type(AccessTokenType).Claim(new Claim("client_id", token.ClientId));
+            foreach (var scope in token.Scopes) builder.Scope(scope);
+        }
+
+        var claims = (token.User?.AllClaims() ?? [])
+            .Concat(PredefinedClaims(token.ClientId)
+                .Where(c => !ReservedClaims.IsReserved(c.Key))
+                .SelectMany(c => c.Value.Select(value => new Claim(c.Key, value))))
+            .ToList();
+        foreach (var claim in claims) builder.Claim(claim);
+        if (entra.Enabled) AddDefaults(builder, entra.AccessTokenClaims(token), claims);
         return builder.Build();
+    }
+
+    /// <summary>Adds claims of types not already given by the user or client profile.</summary>
+    private static void AddDefaults(IJwtBuilder builder, IEnumerable<Claim> defaults, IEnumerable<Claim> given)
+    {
+        var givenTypes = given.Select(c => c.Type).ToHashSet();
+        foreach (var claim in defaults.Where(c => !givenTypes.Contains(c.Type) || ReservedClaims.IsReserved(c.Type)))
+            builder.Claim(claim);
     }
 
     private IDictionary<string, IEnumerable<string>> PredefinedClaims(string clientId) =>

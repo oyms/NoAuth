@@ -28,10 +28,11 @@ internal sealed class TokenRepository(TokenIssuer issuer, TimeProvider time, IWr
     {
         Prune();
         var scopes = issuer.ResolveScopes(request.ClientId, request.Scopes);
+        var audiences = issuer.ResolveAudiences(request.Audiences, scopes);
         var existing = request.Ttl is not null ? null : accessTokens.Values.FirstOrDefault(t =>
             t.User is null &&
             t.ClientId == request.ClientId &&
-            t.Audiences.ToHashSet().SetEquals(request.Audiences) &&
+            t.Audiences.ToHashSet().SetEquals(audiences) &&
             t.Scopes.ToHashSet().SetEquals(scopes));
 
         if (existing is not null)
@@ -46,7 +47,7 @@ internal sealed class TokenRepository(TokenIssuer issuer, TimeProvider time, IWr
             @out.WriteInfo($"Token expired for {existing.ClientId}.");
         }
 
-        var token = Store(issuer.CreateAccessToken(request.ClientId, request.Audiences, scopes, null,
+        var token = Store(issuer.CreateAccessToken(request.ClientId, audiences, scopes, null,
             request.Ttl ?? issuer.DefaultTtl));
         @out.WriteInfo($"Issuing a new token for {request.ClientId}.");
         return token;
@@ -58,12 +59,16 @@ internal sealed class TokenRepository(TokenIssuer issuer, TimeProvider time, IWr
     public AccessToken? FindByRefreshToken(string refreshToken) =>
         accessTokens.Values.FirstOrDefault(t => t.RefreshToken == refreshToken);
 
-    public TokenSet? Refresh(string refreshToken)
+    public TokenSet? Refresh(string refreshToken, IReadOnlyCollection<string>? scopes = null)
     {
         var existing = FindByRefreshToken(refreshToken);
         if (existing is null || !accessTokens.TryRemove(existing.Token, out _)) return null;
 
-        var token = Store(issuer.CreateAccessToken(existing.ClientId, existing.Audiences, existing.Scopes,
+        var resolvedScopes = scopes is { Count: > 0 }
+            ? issuer.ResolveScopes(existing.ClientId, scopes)
+            : existing.Scopes;
+        var audiences = scopes is { Count: > 0 } ? issuer.ResolveAudiences([], resolvedScopes) : existing.Audiences;
+        var token = Store(issuer.CreateAccessToken(existing.ClientId, audiences, resolvedScopes,
             existing.User, issuer.DefaultTtl));
         var idToken = existing.User is null
             ? null
@@ -104,10 +109,11 @@ internal sealed class TokenRepository(TokenIssuer issuer, TimeProvider time, IWr
     public TokenSet IssueTokens(AuthorizationGrant grant, IReadOnlyCollection<string> resources)
     {
         var request = grant.Request;
+        var scopes = issuer.ResolveScopes(request.ClientId, request.Scopes);
         var accessToken = Store(issuer.CreateAccessToken(
             request.ClientId,
-            resources.Count > 0 ? resources : request.Resources,
-            issuer.ResolveScopes(request.ClientId, request.Scopes),
+            issuer.ResolveAudiences(resources.Count > 0 ? resources : request.Resources, scopes),
+            scopes,
             grant.User,
             issuer.DefaultTtl));
         var idToken = Store(issuer.CreateIdToken(request.ClientId, grant.User, request.Nonce, accessToken, grant.Code));

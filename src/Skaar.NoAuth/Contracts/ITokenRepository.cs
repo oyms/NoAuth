@@ -19,8 +19,11 @@ public interface ITokenRepository
 
     AccessToken? FindByRefreshToken(string refreshToken);
 
-    /// <summary>Issues new tokens (and a new refresh token) for a refresh token. Null if not found.</summary>
-    TokenSet? Refresh(string refreshToken);
+    /// <summary>
+    /// Issues new tokens (and a new refresh token) for a refresh token. Null if not found.
+    /// Requested <paramref name="scopes"/> replace the scopes of the refresh token, and give the audiences.
+    /// </summary>
+    TokenSet? Refresh(string refreshToken, IReadOnlyCollection<string>? scopes = null);
 
     void ClearAccessTokens(string clientId);
 

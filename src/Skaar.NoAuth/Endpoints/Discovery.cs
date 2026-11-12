@@ -7,6 +7,7 @@ namespace Skaar.NoAuth.Endpoints;
 
 /// <summary>
 /// OpenID Connect discovery, and OAuth authorization server metadata (RFC 8414). Both serve the same document.
+/// Requested with an Entra tenant path, the urls are Entra paths for that tenant.
 /// </summary>
 internal sealed class Discovery(Configuration config) : IEndpoint
 {
@@ -18,17 +19,21 @@ internal sealed class Discovery(Configuration config) : IEndpoint
     {
         var paths = config.Paths;
         var request = context.Request;
+        var tenant = EntraPaths.Tenant(request);
+        string? Path(string? path, string entraEndpoint) =>
+            tenant is null || string.IsNullOrEmpty(path) ? path : EntraPaths.Path(tenant, entraEndpoint);
+
         var body = new
         {
-            config.Issuer,
-            AuthorizationEndpoint = config.Url(paths.Authorize, request),
-            TokenEndpoint = config.Url(paths.Token.FirstOrDefault(), request),
+            Issuer = tenant is null ? config.Issuer : EntraPaths.Issuer(config, tenant),
+            AuthorizationEndpoint = config.Url(Path(paths.Authorize, EntraPaths.Authorize), request),
+            TokenEndpoint = config.Url(Path(paths.Token.FirstOrDefault(), EntraPaths.Token), request),
             UserinfoEndpoint = config.Url(paths.UserInfo, request),
-            JwksUri = config.Url(paths.Jwks, request),
+            JwksUri = config.Url(Path(paths.Jwks, EntraPaths.Keys), request),
             IntrospectionEndpoint = config.Url(paths.Introspection, request),
             RevocationEndpoint = config.Url(paths.Revocation, request),
             RegistrationEndpoint = config.Url(paths.Registration, request),
-            EndSessionEndpoint = config.Url(paths.EndSession, request),
+            EndSessionEndpoint = config.Url(Path(paths.EndSession, EntraPaths.Logout), request),
             ScopesSupported = new[] { "openid", "profile", "offline_access" },
             ResponseTypesSupported = new[] { "code" },
             ResponseModesSupported = new[] { "query" },

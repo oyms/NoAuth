@@ -8,6 +8,7 @@ public record Configuration
     public Uri BaseUrl { get; set; } = new("https://localhost:44367");
     public Paths Paths { get; set; } = new();
     public Oidc Oidc { get; set; } = new();
+    public Entra Entra { get; set; } = new();
     public bool UseReferenceTokens { get; set; }
 
     /// <summary>

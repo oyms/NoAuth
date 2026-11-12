@@ -42,6 +42,9 @@ public sealed class Server : IAsyncDisposable
                             ?? throw new InvalidOperationException(
                                 $"Missing configuration section '{Configuration.SectionName}'");
         configuration.Paths.Validate();
+        configuration.Entra.Validate();
+        if (configuration.Entra.Enabled)
+            configuration.Issuer = Entra.Issuer(configuration.BaseUrl, configuration.Entra.TenantId);
 
         var listensOnBaseUrl = string.IsNullOrWhiteSpace(builder.Configuration[WebHostDefaults.ServerUrlsKey]);
         if (listensOnBaseUrl) builder.WebHost.UseUrls(configuration.BaseUrl.AbsoluteUri);
@@ -88,6 +91,8 @@ public sealed class Server : IAsyncDisposable
         bld.AppendLine(new string('-', lineLength));
         bld.AppendLine($"{"Listening:".PadRight(lineLength)} {string.Join(", ", urls)}");
         bld.AppendLine($"{"Issuer:".PadRight(lineLength)} {configuration.Issuer}");
+        if (configuration.Entra.Enabled)
+            bld.AppendLine($"{"Entra instance:".PadRight(lineLength)} {configuration.BaseUrl} (tenant {configuration.Entra.TenantId})");
         if (settingsFile is not null) bld.AppendLine($"{"Settings:".PadRight(lineLength)} {settingsFile}");
         BuildStatusString(bld, configuration, lineLength);
         if (!Console.IsInputRedirected)
